@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Believe in somETHing – Generator</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Believe in somETHing">
+  <meta name="twitter:description" content="Join 200+ Ethereum teams posting together on July 29.">
+  <meta name="twitter:image" content="https://www.believeinsomething.io/preview.png">
   <style>
     :root {
       --canvas-w: 1600;
@@ -55,11 +60,10 @@
       display: block;
     }
 
-    .step input[type="color"],
-    .step input[type="file"],
+    .step input,
     .step select {
       width: 100%;
-      padding: 0.7rem;
+      padding: 0.6rem;
       font-size: 1rem;
       border-radius: 0.5rem;
       border: none;
@@ -94,15 +98,28 @@
       background: white;
     }
 
-    .footer {
+    .footer, .toast {
       font-size: 0.9rem;
       text-align: center;
       color: #aaa;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
 
     .footer a {
       color: #ccc;
+    }
+
+    .toast {
+      background: #222;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
     }
 
     @media (max-width: 768px) {
@@ -123,17 +140,24 @@
 
     <div class="controls">
       <div class="step">
-        <label for="bgPicker">Step 1 – Choose a background color</label>
-        <input type="color" id="bgPicker" value="#0d0d11">
+        <label>Step 1 – Choose background</label>
+        <input type="checkbox" id="useGradient"> Use gradient background<br>
+        <input type="text" id="color1" value="#0d0d11" placeholder="#000000">
+        <input type="text" id="color2" value="#8e8df0" placeholder="#ffffff">
+        <select id="gradientAngle">
+          <option value="90">90° (vertical)</option>
+          <option value="45">45°</option>
+          <option value="135">135°</option>
+        </select>
       </div>
 
       <div class="step">
-        <label for="colorPicker">Step 2 – Choose a font color</label>
-        <input type="color" id="colorPicker" value="#ffffff">
+        <label>Step 2 – Choose a font color (HEX)</label>
+        <input type="text" id="fontColor" value="#ffffff" placeholder="#ffffff">
       </div>
 
       <div class="step">
-        <label for="ethPicker">Step 3 – Choose an ETH symbol</label>
+        <label>Step 3 – Choose an ETH symbol</label>
         <select id="ethPicker">
           <option value="rainbow">Rainbow</option>
           <option value="black">Black</option>
@@ -143,32 +167,38 @@
       </div>
 
       <div class="step">
-        <label for="logoInput">Step 4 – Upload your logo (1:1 aspect ratio recommended)</label>
+        <label>Step 4 – Upload your logo (1:1 aspect ratio recommended)</label>
         <input type="file" id="logoInput" accept="image/*">
       </div>
 
       <div class="step">
+        <label>Step 5 – Download and post on July 29, 7:00 AM UTC</label>
         <button id="downloadPNG">Download PNG</button>
-        <button id="downloadSVG">Download SVG</button>
-        <div id="launchTime" style="margin-top: 0.5rem; font-size: 0.85rem; color: #bbb;"></div>
       </div>
 
       <div class="footer">
-        Want to create a custom template? <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2">View examples on Figma</a>
+        Optional: <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2">View examples on Figma</a>
       </div>
+
+      <div class="toast" id="toast">You’re ready to post. Join 200+ teams on July 29 at 7:00 AM UTC.</div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
-    const bgPicker = document.getElementById('bgPicker');
-    const colorPicker = document.getElementById('colorPicker');
+
+    const color1 = document.getElementById('color1');
+    const color2 = document.getElementById('color2');
+    const fontColor = document.getElementById('fontColor');
+    const useGradient = document.getElementById('useGradient');
+    const gradientAngle = document.getElementById('gradientAngle');
+
     const ethPicker = document.getElementById('ethPicker');
     const logoInput = document.getElementById('logoInput');
     const downloadPNG = document.getElementById('downloadPNG');
-    const downloadSVG = document.getElementById('downloadSVG');
-    const launchTime = document.getElementById('launchTime');
+    const toast = document.getElementById('toast');
 
     const ethSymbols = {
       rainbow: 'assets/eth_rainbow.png',
@@ -183,10 +213,20 @@
     let logoImg = null;
 
     function draw() {
-      ctx.fillStyle = bgPicker.value;
+      if (useGradient.checked) {
+        const angle = parseInt(gradientAngle.value) * Math.PI / 180;
+        const x = Math.cos(angle) * canvas.width;
+        const y = Math.sin(angle) * canvas.height;
+        const grad = ctx.createLinearGradient(0, 0, x, y);
+        grad.addColorStop(0, color1.value);
+        grad.addColorStop(1, color2.value);
+        ctx.fillStyle = grad;
+      } else {
+        ctx.fillStyle = color1.value;
+      }
       ctx.fillRect(0, 0, 1600, 900);
 
-      ctx.fillStyle = colorPicker.value;
+      ctx.fillStyle = fontColor.value;
       ctx.font = '150px Roboto';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
@@ -230,25 +270,22 @@
       selectedETH.onload = draw;
     });
 
-    bgPicker.addEventListener('change', draw);
-    colorPicker.addEventListener('change', draw);
+    [color1, color2, fontColor, useGradient, gradientAngle].forEach(el => {
+      el.addEventListener('change', draw);
+      el.addEventListener('input', draw);
+    });
 
     downloadPNG.addEventListener('click', () => {
       const link = document.createElement('a');
       link.download = 'believe-in-somETHing.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-    });
-
-    downloadSVG.addEventListener('click', () => {
-      alert('SVG export with ETH symbol is not yet supported. Stick to PNG for now.');
+      confetti();
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     });
 
     selectedETH.onload = draw;
-
-    const launchEpoch = 1753797600000;
-    const localLaunch = new Date(launchEpoch).toLocaleString();
-    launchTime.innerText = `Scheduled post time: ${localLaunch}`;
   </script>
 </body>
 </html>
