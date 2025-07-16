@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Believe in somETHing – Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --eth-purple: #8e8df0;
+      --dark-bg: #0e0e11;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #ffffff;
+      --canvas-w: 1600;
+      --canvas-h: 900;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--dark-bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .controls {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.875rem;
+      font-weight: 600;
+      gap: 0.4rem;
+      color: #cfcfcf;
+    }
+
+    input[type="file"],
+    input[type="color"] {
+      padding: 0.5rem;
+      background: #1a1a1d;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--eth-purple);
+      color: var(--text);
+      padding: 0.7rem 1.2rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #aaa9f6;
+    }
+
+    #previewWrapper {
+      background: #fff;
+      border-radius: 1rem;
+      overflow: hidden;
+      width: min(92vw, 960px);
+      aspect-ratio: 16 / 9;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    .footer a {
+      color: #aaa;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Believe in somETHing</h1>
+
+  <div class="controls">
+    <label>
+      Upload logo
+      <input type="file" id="logoInput" accept="image/*" />
+    </label>
+    <label>
+      Accent Color
+      <input type="color" id="colorPicker" value="#8e8df0" />
+    </label>
+    <label>
+      Background Color
+      <input type="color" id="bgPicker" value="#ffffff" />
+    </label>
+    <button id="downloadPNG">Download PNG</button>
+    <button id="downloadSVG">Download SVG</button>
+  </div>
+
+  <div id="previewWrapper">
+    <canvas id="previewCanvas" width="1600" height="900"></canvas>
+  </div>
+
+  <div class="footer">
+    View design references: <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2&t=MVBhu7WVSKkFJhnK-1" target="_blank">Community Figma</a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const logoInput = document.getElementById('logoInput');
+    const colorPicker = document.getElementById('colorPicker');
+    const bgPicker = document.getElementById('bgPicker');
+    const downloadPNG = document.getElementById('downloadPNG');
+    const downloadSVG = document.getElementById('downloadSVG');
+
+    let logoImg = null;
+
+    const CANVAS_W = 1600;
+    const CANVAS_H = 900;
+
+    function draw() {
+      const bgColor = bgPicker.value;
+      const textColor = colorPicker.value;
+
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.font = 'bold 140px Inter, sans-serif';
+      ctx.fillText('believe in', CANVAS_W / 2, CANVAS_H * 0.4);
+
+      ctx.font = '900 160px Inter, sans-serif';
+      ctx.fillText('somETHing', CANVAS_W / 2, CANVAS_H * 0.6);
+
+      if (logoImg) {
+        const margin = 40;
+        const maxLogoWidth = 400;
+        const maxLogoHeight = 160;
+        let { width: lw, height: lh } = logoImg;
+        const ratio = Math.min(maxLogoWidth / lw, maxLogoHeight / lh, 1);
+        lw *= ratio;
+        lh *= ratio;
+        ctx.drawImage(logoImg, CANVAS_W - lw - margin, CANVAS_H - lh - margin, lw, lh);
+      }
+    }
+
+    function handleLogo(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoImg = new Image();
+        logoImg.onload = draw;
+        logoImg.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function download(type) {
+      if (type === 'png') {
+        const link = document.createElement('a');
+        link.download = 'believe-in-somETHing.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } else if (type === 'svg') {
+        const bgColor = bgPicker.value;
+        const textColor = colorPicker.value;
+        const svgParts = [];
+        svgParts.push(`<svg xmlns='http://www.w3.org/2000/svg' width='${CANVAS_W}' height='${CANVAS_H}'>`);
+        svgParts.push(`<rect width='100%' height='100%' fill='${bgColor}'/>`);
+        svgParts.push(`<text x='50%' y='${CANVAS_H * 0.4}' font-family='Inter, sans-serif' font-weight='700' font-size='140' text-anchor='middle' dominant-baseline='middle' fill='${textColor}'>believe in</text>`);
+        svgParts.push(`<text x='50%' y='${CANVAS_H * 0.6}' font-family='Inter, sans-serif' font-weight='900' font-size='160' text-anchor='middle' dominant-baseline='middle' fill='${textColor}'>somETHing</text>`);
+        if (logoImg) {
+          const margin = 40;
+          const maxLogoWidth = 400;
+          const maxLogoHeight = 160;
+          let { width: lw, height: lh } = logoImg;
+          const ratio = Math.min(maxLogoWidth / lw, maxLogoHeight / lh, 1);
+          lw *= ratio;
+          lh *= ratio;
+          const x = CANVAS_W - lw - margin;
+          const y = CANVAS_H - lh - margin;
+          svgParts.push(`<image href='${logoImg.src}' x='${x}' y='${y}' width='${lw}' height='${lh}'/>`);
+        }
+        svgParts.push('</svg>');
+        const blob = new Blob(svgParts, { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'believe-in-somETHing.svg';
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    draw();
+
+    logoInput.addEventListener('change', handleLogo);
+    colorPicker.addEventListener('change', draw);
+    bgPicker.addEventListener('change', draw);
+    downloadPNG.addEventListener('click', () => download('png'));
+    downloadSVG.addEventListener('click', () => download('svg'));
+  </script>
+</body>
+</html>
