@@ -397,6 +397,51 @@
         align-items: center;
       }
     }
+    .carousel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2.5rem;
+      margin-bottom: 2.5rem;
+      width: 100%;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 2rem;
+      overflow: hidden;
+      width: 850px;
+      scroll-behavior: smooth;
+    }
+    .carousel-track img {
+      width: 200px;
+      height: 112px;
+      object-fit: contain;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      flex-shrink: 0;
+      transition: box-shadow 0.1s;
+    }
+    .carousel-track img:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    }
+    .github-footer {
+      width: 100%;
+      text-align: center;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      font-size: 1.15rem;
+    }
+    .github-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .github-footer a:hover {
+      color: #ff007a;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -416,6 +461,21 @@
       </div>
       <div class="figma-link">
         Want to design a more customized graphic? <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2" target="_blank">Design a custom one on Figma.</a>
+      </div>
+      <div class="carousel" id="carousel">
+        <div class="carousel-track" id="carousel-track">
+          <!-- Images will be injected by JS -->
+        </div>
+      </div>
+      <div class="carousel" id="carousel2">
+        <div class="carousel-track" id="carousel-track2">
+          <!-- Images will be injected by JS -->
+        </div>
+      </div>
+      <div class="carousel" id="carousel3">
+        <div class="carousel-track" id="carousel-track3">
+          <!-- Images will be injected by JS -->
+        </div>
       </div>
     </div>
     <div class="controls">
@@ -470,6 +530,12 @@
       <div class="toast" id="toast">You’re ready to post. Join 200+ teams on July 29 at 7:00 AM UTC.</div>
     </div>
   </div>
+  <footer class="github-footer">
+    <a href="https://github.com/DillonLin/believe-in-somETHing-generator" target="_blank" rel="noopener">
+      <span style="font-size:1.5rem;vertical-align:middle;">😎</span>
+      Check out the repo on GitHub
+    </a>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
@@ -650,6 +716,69 @@
     modeSwitch.addEventListener('change', () => {
       localStorage.setItem('theme', modeSwitch.checked ? 'light' : 'dark');
     });
+
+    // Carousel logic
+    const carouselTrack = document.getElementById('carousel-track');
+    // Helper to duplicate images for seamless looping
+    function addCarouselImages(track, start, end) {
+      for (let round = 0; round < 2; round++) {
+        for (let i = start; i <= end; i++) {
+          const img = document.createElement('img');
+          img.src = `assets/templates/${i}.png`;
+          img.alt = `Template ${i}`;
+          track.appendChild(img);
+        }
+      }
+    }
+    // Add 1-25 images twice for seamless loop
+    addCarouselImages(carouselTrack, 1, 25);
+    // Auto-scroll
+    let scrollPos = 0;
+    const imgWidth = 800 + 32; // width + gap
+    function autoScrollCarousel() {
+      scrollPos += 2; // moderate speed
+      const maxScroll = carouselTrack.scrollWidth / 2;
+      if (scrollPos >= maxScroll) {
+        scrollPos = 0;
+        carouselTrack.scrollTo({ left: scrollPos, behavior: 'auto' });
+      } else {
+        carouselTrack.scrollTo({ left: scrollPos, behavior: 'smooth' });
+      }
+    }
+    setInterval(autoScrollCarousel, 40); // adjust interval for speed
+
+    // Second carousel logic (images 8-25, scrolls right-to-left)
+    const carouselTrack2 = document.getElementById('carousel-track2');
+    addCarouselImages(carouselTrack2, 8, 25);
+    let scrollPos2 = carouselTrack2.scrollWidth / 2;
+    function autoScrollCarousel2() {
+      scrollPos2 -= 2; // scroll right-to-left
+      const minScroll = 0;
+      const maxScroll = carouselTrack2.scrollWidth / 2;
+      if (scrollPos2 <= minScroll) {
+        scrollPos2 = maxScroll;
+        carouselTrack2.scrollTo({ left: scrollPos2, behavior: 'auto' });
+      } else {
+        carouselTrack2.scrollTo({ left: scrollPos2, behavior: 'smooth' });
+      }
+    }
+    setInterval(autoScrollCarousel2, 40);
+
+    // Third carousel logic (images 16-25, scrolls left-to-right)
+    const carouselTrack3 = document.getElementById('carousel-track3');
+    addCarouselImages(carouselTrack3, 16, 25);
+    let scrollPos3 = 0;
+    function autoScrollCarousel3() {
+      scrollPos3 += 2;
+      const maxScroll = carouselTrack3.scrollWidth / 2;
+      if (scrollPos3 >= maxScroll) {
+        scrollPos3 = 0;
+        carouselTrack3.scrollTo({ left: scrollPos3, behavior: 'auto' });
+      } else {
+        carouselTrack3.scrollTo({ left: scrollPos3, behavior: 'smooth' });
+      }
+    }
+    setInterval(autoScrollCarousel3, 40);
   </script>
 </body>
 </html>
