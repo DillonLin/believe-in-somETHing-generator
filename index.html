@@ -16,6 +16,15 @@
       --canvas-h: 900;
       --accent: #8e8df0;
       --bg-dark: #0d0d11;
+      --bg-light: #f7f7fa;
+      --text-dark: #0d0d11;
+      --text-light: #fff;
+      --step-bg-dark: #16161d;
+      --step-bg-light: #fff;
+      --step-border-dark: #2a2a33;
+      --step-border-light: #e0e0e0;
+      --input-border-dark: #8e8df0;
+      --input-border-light: #8e8df0;
     }
 
     body {
@@ -23,16 +32,85 @@
       padding: 2rem;
       background: var(--bg-dark);
       font-family: 'Fredoka', sans-serif;
-      color: white;
+      color: var(--text-light);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2rem;
     }
+    body.light-mode {
+      background: var(--bg-light);
+      color: var(--text-dark);
+    }
 
     h1 {
       font-size: 2rem;
       font-weight: 700;
+    }
+
+    .mode-toggle {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 26px;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+    .slider:after {
+      content: '\1F319'; /* moon emoji */
+      position: absolute;
+      right: 8px;
+      top: 3px;
+      font-size: 16px;
+      opacity: 0.7;
+      transition: .4s;
+    }
+    input:checked + .slider:after {
+      content: '\2600'; /* sun emoji */
+      left: 8px;
+      right: auto;
+      opacity: 0.9;
     }
 
     .container {
@@ -66,10 +144,27 @@
       padding: 0.6rem;
       font-size: 1rem;
       border-radius: 0.5rem;
-      border: none;
+      border: 2px solid var(--input-border-dark);
       font-family: 'Fredoka', sans-serif;
-      background: #1c1c24;
-      color: white;
+      background: var(--step-bg-dark);
+      color: var(--text-light);
+    }
+    .step input:focus,
+    .step select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(142,141,240,0.2);
+    }
+    body.light-mode .step input,
+    body.light-mode .step select {
+      background: var(--step-bg-light);
+      color: var(--text-dark);
+      border: 2px solid var(--input-border-light);
+    }
+    body.light-mode .step input:focus,
+    body.light-mode .step select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(142,141,240,0.12);
     }
 
     button {
@@ -89,6 +184,9 @@
       flex: 2;
       min-width: 300px;
       max-width: 700px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     canvas {
@@ -96,6 +194,13 @@
       height: auto;
       border-radius: 1rem;
       background: white;
+      border: 4px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(142,141,240,0.15), 0 4px 24px rgba(0,0,0,0.10);
+    }
+    body.light-mode canvas {
+      background: #fff;
+      border: 4px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(142,141,240,0.10), 0 4px 24px rgba(0,0,0,0.06);
     }
 
     .footer, .toast {
@@ -108,6 +213,27 @@
     .footer a {
       color: #ccc;
     }
+    body.light-mode .footer a {
+      color: #666;
+    }
+
+    .step {
+      background: var(--step-bg-dark);
+      border: 1px solid var(--step-border-dark);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: border 0.3s ease;
+    }
+    body.light-mode .step {
+      background: var(--step-bg-light);
+      border: 1px solid var(--step-border-light);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .step:hover {
+      border-color: var(--accent);
+    }
 
     .toast {
       background: #222;
@@ -117,9 +243,82 @@
       opacity: 0;
       transition: opacity 0.5s ease;
     }
+    body.light-mode .toast {
+      background: #eee;
+      color: #222;
+    }
 
-    .toast.show {
-      opacity: 1;
+    /* Stylish checkbox */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .custom-checkbox {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+    }
+    .custom-checkbox input[type="checkbox"] {
+      opacity: 0;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 22px;
+      width: 22px;
+      background-color: #1c1c24;
+      border: 2px solid #8e8df0;
+      border-radius: 6px;
+      transition: background 0.2s;
+      z-index: 1;
+    }
+    .custom-checkbox input:checked ~ .checkmark {
+      background-color: #8e8df0;
+      border-color: #8e8df0;
+    }
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+    .custom-checkbox input:checked ~ .checkmark:after {
+      display: block;
+    }
+    .custom-checkbox .checkmark:after {
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 12px;
+      border: solid white;
+      border-width: 0 3px 3px 0;
+      transform: rotate(45deg);
+      content: "";
+      position: absolute;
+      display: none;
+    }
+    .custom-checkbox input:checked ~ .checkmark:after {
+      display: block;
+    }
+    .gradient-options {
+      display: none;
+      margin-top: 1rem;
+      gap: 0.5rem;
+    }
+    .gradient-options.visible {
+      display: flex;
+      flex-direction: column;
     }
 
     @media (max-width: 768px) {
@@ -131,7 +330,13 @@
   </style>
 </head>
 <body>
-  <h1>Believe in somETHing</h1>
+  <div class="mode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="modeSwitch">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <h1>believe in somETHing generator!</h1>
 
   <div class="container">
     <div class="canvas-wrapper">
@@ -141,14 +346,25 @@
     <div class="controls">
       <div class="step">
         <label>Step 1 – Choose background</label>
-        <input type="checkbox" id="useGradient"> Use gradient background<br>
-        <input type="text" id="color1" value="#0d0d11" placeholder="#000000">
-        <input type="text" id="color2" value="#8e8df0" placeholder="#ffffff">
-        <select id="gradientAngle">
-          <option value="90">90° (vertical)</option>
-          <option value="45">45°</option>
-          <option value="135">135°</option>
-        </select>
+        <div id="singleColorRow">
+          <input type="text" id="singleColor" value="#0d0d11" placeholder="#000000">
+        </div>
+        <div class="gradient-options" id="gradientOptions">
+          <input type="text" id="color1" value="#0d0d11" placeholder="#000000">
+          <input type="text" id="color2" value="#8e8df0" placeholder="#ffffff">
+          <select id="gradientAngle">
+            <option value="90">90° (vertical)</option>
+            <option value="45">45°</option>
+            <option value="135">135°</option>
+          </select>
+        </div>
+        <div class="checkbox-row" style="margin-top:1.2rem;">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="useGradient">
+            <span class="checkmark"></span>
+          </label>
+          <span for="useGradient" style="cursor:pointer;">Use gradient background</span>
+        </div>
       </div>
 
       <div class="step">
@@ -172,7 +388,7 @@
       </div>
 
       <div class="step">
-        <label>Step 5 – Download and post on July 29, 7:00 AM UTC</label>
+        <label>Step 5 – Download and post on July 29, 1:00 PM UTC</label>
         <button id="downloadPNG">Download PNG</button>
       </div>
 
@@ -194,11 +410,15 @@
     const fontColor = document.getElementById('fontColor');
     const useGradient = document.getElementById('useGradient');
     const gradientAngle = document.getElementById('gradientAngle');
+    const gradientOptions = document.getElementById('gradientOptions');
+    const singleColor = document.getElementById('singleColor');
+    const singleColorRow = document.getElementById('singleColorRow');
 
     const ethPicker = document.getElementById('ethPicker');
     const logoInput = document.getElementById('logoInput');
     const downloadPNG = document.getElementById('downloadPNG');
     const toast = document.getElementById('toast');
+    const modeSwitch = document.getElementById('modeSwitch');
 
     const ethSymbols = {
       rainbow: 'assets/eth_rainbow.png',
@@ -222,7 +442,7 @@
         grad.addColorStop(1, color2.value);
         ctx.fillStyle = grad;
       } else {
-        ctx.fillStyle = color1.value;
+        ctx.fillStyle = singleColor.value;
       }
       ctx.fillRect(0, 0, 1600, 900);
 
@@ -270,10 +490,25 @@
       selectedETH.onload = draw;
     });
 
-    [color1, color2, fontColor, useGradient, gradientAngle].forEach(el => {
+    [color1, color2, fontColor, useGradient, gradientAngle, singleColor].forEach(el => {
       el.addEventListener('change', draw);
       el.addEventListener('input', draw);
     });
+
+    // Show/hide gradient options
+    function toggleGradientOptions() {
+      if (useGradient.checked) {
+        gradientOptions.classList.add('visible');
+        singleColorRow.style.display = 'none';
+      } else {
+        gradientOptions.classList.remove('visible');
+        singleColorRow.style.display = 'block';
+      }
+      draw();
+    }
+    useGradient.addEventListener('change', toggleGradientOptions);
+    // Initialize on load
+    toggleGradientOptions();
 
     downloadPNG.addEventListener('click', () => {
       const link = document.createElement('a');
@@ -286,6 +521,23 @@
     });
 
     selectedETH.onload = draw;
+
+    // Light/Dark mode toggle
+    modeSwitch.addEventListener('change', () => {
+      if (modeSwitch.checked) {
+        document.body.classList.add('light-mode');
+      } else {
+        document.body.classList.remove('light-mode');
+      }
+    });
+    // Optionally, remember mode in localStorage
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light-mode');
+      modeSwitch.checked = true;
+    }
+    modeSwitch.addEventListener('change', () => {
+      localStorage.setItem('theme', modeSwitch.checked ? 'light' : 'dark');
+    });
   </script>
 </body>
 </html>
