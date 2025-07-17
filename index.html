@@ -3,65 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Believe in somETHing Generator</title>
-  <meta property="og:title" content="Believe in somETHing" />
-  <meta property="og:description" content="Join 200+ teams posting for Ethereum’s 10th birthday." />
-  <meta property="og:image" content="/preview.png" />
-  <meta property="og:url" content="https://believeinsomething.io" />
-  <link rel="icon" type="image/png" href="eth_symbol_black.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Believe in somETHing – Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Believe in somETHing">
+  <meta name="twitter:description" content="Join 200+ Ethereum teams posting together on July 29.">
+  <meta name="twitter:image" content="https://www.believeinsomething.io/preview.png">
   <style>
+    :root {
+      --canvas-w: 1600;
+      --canvas-h: 900;
+      --accent: #8e8df0;
+      --bg-dark: #0d0d11;
+    }
+
     body {
-      font-family: 'Roboto', sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 2rem;
+      background: var(--bg-dark);
+      font-family: 'Fredoka', sans-serif;
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: #f0f0f0;
-    }
-    .container {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      flex-wrap: wrap;
-      max-width: 1200px;
-      margin-top: 2rem;
-      padding: 1rem;
       gap: 2rem;
     }
-    canvas {
-      border: 1px solid #ccc;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
     }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.25rem;
+      flex: 1;
+      min-width: 280px;
       max-width: 400px;
     }
-    label {
-      font-weight: bold;
+
+    .step label {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      display: block;
     }
-    input[type="color"], input[type="file"], select {
+
+    .step input,
+    .step select {
       width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-    }
-    button {
-      padding: 0.75rem;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
       border: none;
-      background-color: #4CAF50;
+      font-family: 'Fredoka', sans-serif;
+      background: #1c1c24;
       color: white;
+    }
+
+    button {
+      margin-top: 0.5rem;
+      background: var(--accent);
+      color: white;
+      padding: 0.7rem 1.5rem;
       font-weight: bold;
-      border-radius: 6px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
       cursor: pointer;
+      font-family: 'Fredoka', sans-serif;
     }
-    .toast {
+
+    .canvas-wrapper {
+      flex: 2;
+      min-width: 300px;
+      max-width: 700px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 1rem;
+      background: white;
+    }
+
+    .footer, .toast {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #aaa;
       margin-top: 1rem;
-      color: green;
-      font-weight: bold;
-      display: none;
     }
+
+    .footer a {
+      color: #ccc;
+    }
+
+    .toast {
+      background: #222;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -71,143 +131,161 @@
   </style>
 </head>
 <body>
-  <h1>Believe in somETHing Generator</h1>
+  <h1>Believe in somETHing</h1>
+
   <div class="container">
-    <canvas id="canvas" width="1600" height="900"></canvas>
+    <div class="canvas-wrapper">
+      <canvas id="previewCanvas" width="1600" height="900"></canvas>
+    </div>
+
     <div class="controls">
-      <label for="bgColor">Step 1: Choose background color (HEX)</label>
-      <input type="color" id="bgColor" value="#ffffff" />
-
-      <label><input type="checkbox" id="useGradient" /> Use gradient?</label>
-
-      <div id="gradientControls" style="display: none;">
-        <label for="gradientStart">Gradient Start</label>
-        <input type="color" id="gradientStart" value="#ffffff" />
-
-        <label for="gradientEnd">Gradient End</label>
-        <input type="color" id="gradientEnd" value="#000000" />
-
-        <label for="gradientAngle">Gradient Angle</label>
+      <div class="step">
+        <label>Step 1 – Choose background</label>
+        <input type="checkbox" id="useGradient"> Use gradient background<br>
+        <input type="text" id="color1" value="#0d0d11" placeholder="#000000">
+        <input type="text" id="color2" value="#8e8df0" placeholder="#ffffff">
         <select id="gradientAngle">
-          <option value="0">0° (Top → Bottom)</option>
-          <option value="90">90° (Left → Right)</option>
+          <option value="90">90° (vertical)</option>
+          <option value="45">45°</option>
           <option value="135">135°</option>
-          <option value="180">180° (Bottom → Top)</option>
-          <option value="225">225°</option>
         </select>
       </div>
 
-      <label for="fontColor">Step 2: Choose font color</label>
-      <input type="color" id="fontColor" value="#000000" />
+      <div class="step">
+        <label>Step 2 – Choose a font color (HEX)</label>
+        <input type="text" id="fontColor" value="#ffffff" placeholder="#ffffff">
+      </div>
 
-      <label for="ethIcon">Step 3: Choose an ETH logo image</label>
-      <select id="ethIcon">
-        <option value="eth_symbol_black.png">Black</option>
-        <option value="eth_symbol_grey.png">Grey</option>
-        <option value="eth_symbol_purple.png">Purple</option>
-        <option value="eth_symbol_rainbow.png">Rainbow</option>
-      </select>
+      <div class="step">
+        <label>Step 3 – Choose an ETH symbol</label>
+        <select id="ethPicker">
+          <option value="rainbow">Rainbow</option>
+          <option value="black">Black</option>
+          <option value="grey">Grey</option>
+          <option value="purple">Purple</option>
+        </select>
+      </div>
 
-      <label for="logoUpload">Step 4: Upload your logo (1:1 ratio)</label>
-      <input type="file" id="logoUpload" accept="image/*" />
+      <div class="step">
+        <label>Step 4 – Upload your logo (1:1 aspect ratio recommended)</label>
+        <input type="file" id="logoInput" accept="image/*">
+      </div>
 
-      <button onclick="downloadImage('png')">Download PNG</button>
-      <button onclick="downloadImage('svg')">Download SVG</button>
+      <div class="step">
+        <label>Step 5 – Download and post on July 29, 7:00 AM UTC</label>
+        <button id="downloadPNG">Download PNG</button>
+      </div>
+
+      <div class="footer">
+        Optional: <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2">View examples on Figma</a>
+      </div>
 
       <div class="toast" id="toast">You’re ready to post. Join 200+ teams on July 29 at 7:00 AM UTC.</div>
-
-      <label>Step 5: Download and post on July 29 at 7:00 AM UTC</label>
-
-      <p>Optional: Want to create a custom template? <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination" target="_blank">View examples on Figma</a></p>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
-    const toast = document.getElementById('toast');
 
-    const bgColorInput = document.getElementById('bgColor');
-    const fontColorInput = document.getElementById('fontColor');
-    const logoUpload = document.getElementById('logoUpload');
-    const ethIconSelect = document.getElementById('ethIcon');
+    const color1 = document.getElementById('color1');
+    const color2 = document.getElementById('color2');
+    const fontColor = document.getElementById('fontColor');
     const useGradient = document.getElementById('useGradient');
-    const gradientControls = document.getElementById('gradientControls');
-
-    const gradientStart = document.getElementById('gradientStart');
-    const gradientEnd = document.getElementById('gradientEnd');
     const gradientAngle = document.getElementById('gradientAngle');
 
-    useGradient.addEventListener('change', () => {
-      gradientControls.style.display = useGradient.checked ? 'block' : 'none';
-      draw();
-    });
+    const ethPicker = document.getElementById('ethPicker');
+    const logoInput = document.getElementById('logoInput');
+    const downloadPNG = document.getElementById('downloadPNG');
+    const toast = document.getElementById('toast');
 
-    [bgColorInput, fontColorInput, logoUpload, ethIconSelect, gradientStart, gradientEnd, gradientAngle].forEach(el => {
-      el.addEventListener('input', draw);
-      el.addEventListener('change', draw);
-    });
+    const ethSymbols = {
+      rainbow: 'assets/eth_rainbow.png',
+      black: 'assets/eth_black.png',
+      grey: 'assets/eth_grey.png',
+      purple: 'assets/eth_purple.png'
+    };
+
+    let selectedETH = new Image();
+    selectedETH.src = ethSymbols['rainbow'];
+
+    let logoImg = null;
 
     function draw() {
-      // Background
       if (useGradient.checked) {
         const angle = parseInt(gradientAngle.value) * Math.PI / 180;
         const x = Math.cos(angle) * canvas.width;
         const y = Math.sin(angle) * canvas.height;
         const grad = ctx.createLinearGradient(0, 0, x, y);
-        grad.addColorStop(0, gradientStart.value);
-        grad.addColorStop(1, gradientEnd.value);
+        grad.addColorStop(0, color1.value);
+        grad.addColorStop(1, color2.value);
         ctx.fillStyle = grad;
       } else {
-        ctx.fillStyle = bgColorInput.value;
+        ctx.fillStyle = color1.value;
       }
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, 1600, 900);
 
-      // Text
-      ctx.fillStyle = fontColorInput.value;
+      ctx.fillStyle = fontColor.value;
       ctx.font = '150px Roboto';
-      ctx.textAlign = 'center';
-      ctx.fillText('believe in som', canvas.width / 2 - 90, canvas.height / 2);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
 
-      const img = new Image();
-      img.src = ethIconSelect.value;
-      img.onload = () => {
-        ctx.drawImage(img, canvas.width / 2 + 160, canvas.height / 2 - 120, 120, 120);
-        ctx.fillText('ing', canvas.width / 2 + 260, canvas.height / 2);
+      ctx.fillText('believe in som', 100, 450);
+      const ethX = 100 + ctx.measureText('believe in som').width + 30;
+
+      if (selectedETH.complete) {
+        ctx.drawImage(selectedETH, ethX, 320, 120, 180);
       }
 
-      // Logo (bottom right)
-      if (logoUpload.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const logoImg = new Image();
-          logoImg.onload = function() {
-            ctx.drawImage(logoImg, canvas.width - 200, canvas.height - 200, 150, 150);
-          };
-          logoImg.src = evt.target.result;
-        };
-        reader.readAsDataURL(logoUpload.files[0]);
+      const ingX = ethX + 140;
+      ctx.fillText('ing', ingX, 450);
+
+      if (logoImg) {
+        const margin = 40;
+        const maxLogoWidth = 200;
+        const maxLogoHeight = 200;
+        let { width: lw, height: lh } = logoImg;
+        const ratio = Math.min(maxLogoWidth / lw, maxLogoHeight / lh);
+        lw *= ratio;
+        lh *= ratio;
+        ctx.drawImage(logoImg, 1600 - lw - margin, 900 - lh - margin, lw, lh);
       }
     }
 
-    function downloadImage(type) {
-      draw();
-      setTimeout(() => {
-        if (type === 'png') {
-          const a = document.createElement('a');
-          a.download = 'believe-in-something.png';
-          a.href = canvas.toDataURL();
-          a.click();
-        } else {
-          alert('SVG export coming soon!');
-        }
-        confetti();
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 3000);
-      }, 100);
-    }
+    logoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoImg = new Image();
+        logoImg.onload = draw;
+        logoImg.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-    draw();
+    ethPicker.addEventListener('change', () => {
+      selectedETH.src = ethSymbols[ethPicker.value];
+      selectedETH.onload = draw;
+    });
+
+    [color1, color2, fontColor, useGradient, gradientAngle].forEach(el => {
+      el.addEventListener('change', draw);
+      el.addEventListener('input', draw);
+    });
+
+    downloadPNG.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'believe-in-somETHing.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      confetti();
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    });
+
+    selectedETH.onload = draw;
   </script>
 </body>
 </html>
