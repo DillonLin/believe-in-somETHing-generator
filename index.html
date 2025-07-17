@@ -415,18 +415,18 @@
         <canvas id="previewCanvas" width="1600" height="900"></canvas>
       </div>
       <div class="figma-link">
-        Want to design a more customized graphic? <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2" target="_blank">View other examples on Figma.</a>
+        Want to design a more customized graphic? <a href="https://www.figma.com/design/1uMOWnqYoLiT7r8UTXOcmz/Believe-in-SomETHing-Campaign-Coordination?node-id=3311-2" target="_blank">Design a custom one on Figma.</a>
       </div>
     </div>
     <div class="controls">
       <div class="step">
         <label>Step 1 – Choose a single or multiple background color(s) (HEX)</label>
         <div id="singleColorRow">
-          <input type="text" id="singleColor" value="#0d0d11" placeholder="#000000">
+          <input type="text" id="singleColor" value="#FF007A" placeholder="#000000">
         </div>
         <div class="gradient-options" id="gradientOptions">
-          <input type="text" id="color1" value="#0d0d11" placeholder="#000000">
-          <input type="text" id="color2" value="#8e8df0" placeholder="#ffffff">
+          <input type="text" id="color1" value="#FCB124" placeholder="#000000">
+          <input type="text" id="color2" value="#F63E58" placeholder="#ffffff">
           <select id="gradientAngle">
             <option value="90">90° (vertical)</option>
             <option value="45">45°</option>
@@ -444,14 +444,14 @@
 
       <div class="step">
         <label>Step 2 – Choose a font color (HEX)</label>
-        <input type="text" id="fontColor" value="#ffffff" placeholder="#ffffff">
+        <input type="text" id="fontColor" value="#FFFFFF" placeholder="#ffffff">
       </div>
 
       <div class="step">
         <label>Step 3 – Choose an ETH symbol</label>
         <select id="ethPicker">
           <option value="rainbow">Rainbow</option>
-          <option value="black">Black</option>
+          <option value="black" selected>Black</option>
           <option value="grey">Grey</option>
           <option value="purple">Purple</option>
         </select>
@@ -499,9 +499,21 @@
     };
 
     let selectedETH = new Image();
-    selectedETH.src = ethSymbols['rainbow'];
+    selectedETH.src = ethSymbols['black'];
 
+    // Default logo
     let logoImg = null;
+    let defaultLogo = new Image();
+    defaultLogo.src = 'assets/default_logo.png'; // Place your default logo here
+    defaultLogo.onload = () => {
+      if (!logoImg) draw();
+    };
+
+    // Set gradient as default background
+    window.addEventListener('DOMContentLoaded', () => {
+      useGradient.checked = true;
+      toggleGradientOptions();
+    });
 
     function draw() {
       if (useGradient.checked) {
@@ -518,7 +530,7 @@
       ctx.fillRect(0, 0, 1600, 900);
 
       ctx.fillStyle = fontColor.value;
-      ctx.font = '150px Roboto, Arial, sans-serif';
+      ctx.font = '500 150px Roboto, Arial, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
 
@@ -526,21 +538,40 @@
       const ethX = 100 + ctx.measureText('believe in som').width + 30;
 
       if (selectedETH.complete) {
-        ctx.drawImage(selectedETH, ethX, 320, 120, 180);
+        // Draw ETH symbol in its original size
+        ctx.drawImage(selectedETH, ethX, 270, selectedETH.naturalWidth, selectedETH.naturalHeight);
       }
 
-      const ingX = ethX + 140;
+      const ingX = ethX + 225;
       ctx.fillText('ing', ingX, 450);
 
-      if (logoImg) {
-        const margin = 40;
-        const maxLogoWidth = 200;
-        const maxLogoHeight = 200;
-        let { width: lw, height: lh } = logoImg;
-        const ratio = Math.min(maxLogoWidth / lw, maxLogoHeight / lh);
-        lw *= ratio;
-        lh *= ratio;
-        ctx.drawImage(logoImg, 1600 - lw - margin, 900 - lh - margin, lw, lh);
+      // Find the bottom of the 'g' in 'something'
+      ctx.font = '500 150px Roboto, Arial, sans-serif';
+      const textFull = 'believe in somETHing';
+      const textWidth = ctx.measureText(textFull).width;
+      // The 'g' ends at x = 100 + textWidth
+      const gEndY = 450 + 75; // 75 is half the font size, so bottom of text
+
+      // Use logoImg if uploaded, otherwise use defaultLogo if loaded
+      let logoToDraw = logoImg || (defaultLogo.complete && defaultLogo.naturalWidth > 0 ? defaultLogo : null);
+      if (logoToDraw) {
+        // Draw logo with max width or height 150px, maintaining aspect ratio
+        const maxLogoSize = 150;
+        const marginRight = 80;
+        const marginBottom = 80;
+        let { width: lw, height: lh } = logoToDraw;
+        let drawW = maxLogoSize, drawH = maxLogoSize;
+        if (lw > lh) {
+          drawW = maxLogoSize;
+          drawH = lh * (maxLogoSize / lw);
+        } else {
+          drawH = maxLogoSize;
+          drawW = lw * (maxLogoSize / lh);
+        }
+        // Place so top edge is just beneath the 'g', right edge is marginRight from canvas right, bottom edge is marginBottom from canvas bottom
+        const x = canvas.width - drawW - marginRight;
+        const y = Math.max(gEndY + 10, canvas.height - drawH - marginBottom); // 10px below the g, but never off the canvas
+        ctx.drawImage(logoToDraw, x, y, drawW, drawH);
       }
     }
 
